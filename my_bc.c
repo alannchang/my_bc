@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
-
 typedef struct node{
     char* data;
     struct node* next;
@@ -17,7 +16,6 @@ void enqueue(node** head, char* data) {
     }
     newNode->data = data;
     newNode->next = NULL; // New node will be the last node, so set its next to NULL
-
     if (*head == NULL) {
         // If the list is empty, make the new node the head
         *head = newNode;
@@ -36,7 +34,7 @@ void enqueue(node** head, char* data) {
 void print_queue(node* head) {
     node* current = head;
     while (current != NULL) {
-        printf("%s -> ", current->data);
+        printf("%s => ", current->data);
         current = current->next;
     }
     printf("NULL\n");
@@ -124,23 +122,22 @@ void shunting_yard (char** string_array, node* output_queue, char* operator_stac
 
         } else if (*token == ')') { // ')'
             printf(") found!\n");
-            while (operator_stack[stk_index-1] != '(') {
-                if (stk_index == 0) return; // if no '(' found, uh oh
+            while (stk_index > 0 && operator_stack[stk_index - 1] != '(') {
                 
-                stk_index--; // pop operators from stack into queue
-                char temp[1];
-                temp[0] = operator_stack[stk_index];
+                char temp[2] = {operator_stack[--stk_index], '\0'};
+                char* copy = strdup(temp);
+
+                enqueue(&output_queue, copy);
+                print_queue(output_queue);                
                 
                 operator_stack[stk_index] = '\0';
                 printf("OPERATOR STACK: %s\n", operator_stack);
                 
-                enqueue(&output_queue, temp);
-                print_queue(output_queue);
-                
             }
             // remove '('
-            stk_index--;
-            operator_stack[stk_index] = '\0';
+            if (stk_index > 0 && operator_stack[stk_index - 1] == '(') {
+                operator_stack[--stk_index] = '\0';
+            }
                     
         } else {
             operator_stack[stk_index++] = *token;
@@ -158,7 +155,7 @@ int main(int ac, char** av) {
     
     // TEST CASES
     
-    char case_1[] = "32 + 420 * ( 20 - 1 + 3 - 6 ) * 10 / 2";
+    char case_1[] = "32 + 420 * ( 20 * 1 + 3 - 6 ) * 10 / 2";
     char case_2[] = "1 + 2 * (3 - 42) / 5";
     char case_3[] = "1+2*(3-42)/5";
     char case_4[] = "321()";
@@ -173,9 +170,7 @@ int main(int ac, char** av) {
     // remove spaces and get strlen
     int strlen = rm_space_and_strlen(test);
     printf("%s\nstrlen = %d\n", test, strlen); // TEST PRINT
-
     // create string array to separate out operators/parentheses and integers
-
     char** string_array = make_str_arr(test, strlen);
     for (int i = 0; string_array[i] != NULL; i++) {
         printf("%s", string_array[i]); // TEST PRINT
@@ -183,7 +178,6 @@ int main(int ac, char** av) {
     printf("\n");
 
     // use shunting-yard algorithm to produce infix expression
-
     char operator_stack[strlen];
     node* head = NULL;
     node* current = NULL;
