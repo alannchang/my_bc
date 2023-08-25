@@ -111,16 +111,16 @@ void shunting_yard (char** string_array, node* output_queue, char* operator_stac
         
         char* token = *string_array; // read a token
         
-        if (token[0] >= '0' && token[0] <= '9') { // number ---> output queue 
+        if (token[0] >= '0' && token[0] <= '9') { // INTEGER 
             enqueue(&output_queue, token);
             print_queue(output_queue);
 
-        } else if (*token == '(') { // '(' ----> operator stack
+        } else if (*token == '(') { // LEFT PARENTHESIS
             operator_stack[stk_index++] = *token;
             operator_stack[stk_index] = '\0';
             printf("OPERATOR STACK: %s\n", operator_stack);
 
-        } else if (*token == ')') { // ')'
+        } else if (*token == ')') { // RIGHT PARENTHESIS
             printf(") found!\n");
             while (stk_index > 0 && operator_stack[stk_index - 1] != '(') {
                 
@@ -139,7 +139,7 @@ void shunting_yard (char** string_array, node* output_queue, char* operator_stac
                 operator_stack[--stk_index] = '\0';
             }
                     
-        } else {
+        } else { // OPERATOR
             operator_stack[stk_index++] = *token;
             operator_stack[stk_index] = '\0';
             printf("OPERATOR STACK: %s\n", operator_stack);
@@ -148,6 +148,20 @@ void shunting_yard (char** string_array, node* output_queue, char* operator_stac
 
         string_array++;
     }
+
+    // After while loop, pop the remaining items from the operator stack into the output queue.
+    while (stk_index > 0) {
+        char temp[2] = {operator_stack[--stk_index], '\0'};
+        char* copy = strdup(temp);
+
+        enqueue(&output_queue, copy);
+        print_queue(output_queue);
+
+        operator_stack[stk_index] = '\0';
+        printf("OPERATOR STACK: %s\n", operator_stack);
+    }
+
+
 }
 
 
