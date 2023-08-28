@@ -2,15 +2,30 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
+#include <stdbool.h>
 
-typedef struct node{
+typedef struct queue_node {
     char* data;
-    struct node* next;
-} node;
+    struct queue_node* next;
+} q_node;
+
+struct operator_info {
+    const char operator;
+    const int precedence;
+};
+
+const struct operator_info operator_hash[] = {
+    {'+', 2},
+    {'-', 2},
+    {'*', 3},
+    {'/', 3},
+    {'%', 3},
+};
+
 
 // Function to add a node to the end of the linked list
-void enqueue(node** head, char* data) {
-    node* newNode = (node*) malloc(sizeof(node));
+void enqueue(q_node** head, char* data) {
+    q_node* newNode = (q_node*) malloc(sizeof(q_node));
     if (newNode == NULL) {
         // Handle memory allocation error
         return;
@@ -22,7 +37,7 @@ void enqueue(node** head, char* data) {
         *head = newNode;
     } else {
         // Otherwise, traverse the list to find the last node
-        node* current = *head;
+        q_node* current = *head;
         while (current->next != NULL) {
             current = current->next;
         }
@@ -32,8 +47,8 @@ void enqueue(node** head, char* data) {
 }
 
 // Function to print the linked list
-void print_queue(node* head) {
-    node* current = head;
+void print_queue(q_node* head) {
+    q_node* current = head;
     while (current != NULL) {
         printf("%s => ", current->data);
         current = current->next;
@@ -106,7 +121,24 @@ char** make_str_arr(char* str, int arr_len) {
     return str_arr;
 }
 
-void shunting_yard (char** string_array, node* output_queue, char* operator_stack) {
+int lookup_precedence(char operator) {
+
+    for (int i = 0; i < sizeof(operator_hash)/sizeof(operator_hash[0]); i++) {
+        if (operator == operator_hash[i].operator) {
+            return operator_hash[i].precedence;
+        }
+    }
+    return 0;
+}
+
+bool compare_precedence(char operator_1, char operator_2) {
+    lookup_precedence(operator_1);
+    lookup_precedence(operator_2);
+    return false;
+
+}
+
+void shunting_yard (char** string_array, q_node* output_queue, char* operator_stack) {
     int stk_index = 0;
     while (*string_array != NULL) { // while there are tokens to be read:
         
@@ -141,7 +173,7 @@ void shunting_yard (char** string_array, node* output_queue, char* operator_stac
             }
                     
         } else if (*token == '+' || *token == '-' || *token == '*' || *token == '/' || *token == '%') { // OPERATOR
-            while (operator_stack[stk_index - 1] != '(' && ) {
+            while (operator_stack[stk_index - 1] != '(' && compare_precedence(*token, operator_stack[stk_index - 1])) {
 
             }
             operator_stack[stk_index++] = *token;
@@ -197,8 +229,8 @@ int main(int ac, char** av) {
 
     // use shunting-yard algorithm to produce infix expression
     char operator_stack[strlen];
-    node* head = NULL;
-    node* current = NULL;
+    q_node* head = NULL;
+    q_node* current = NULL;
     shunting_yard(string_array, head, operator_stack);
 
     // infix expression ---------> postfix expression
