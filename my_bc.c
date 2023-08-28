@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
+
 typedef struct node{
     char* data;
     struct node* next;
@@ -139,7 +140,10 @@ void shunting_yard (char** string_array, node* output_queue, char* operator_stac
                 operator_stack[--stk_index] = '\0';
             }
                     
-        } else { // OPERATOR
+        } else if (*token == '+' || *token == '-' || *token == '*' || *token == '/' || *token == '%') { // OPERATOR
+            while (operator_stack[stk_index - 1] != '(' && ) {
+
+            }
             operator_stack[stk_index++] = *token;
             operator_stack[stk_index] = '\0';
             printf("OPERATOR STACK: %s\n", operator_stack);
@@ -149,7 +153,7 @@ void shunting_yard (char** string_array, node* output_queue, char* operator_stac
         string_array++;
     }
 
-    // After while loop, pop the remaining items from the operator stack into the output queue.
+    // After while loop, pop everything from operator stack to output queue.
     while (stk_index > 0) {
         char temp[2] = {operator_stack[--stk_index], '\0'};
         char* copy = strdup(temp);
