@@ -121,7 +121,7 @@ char** make_str_arr(char* str, int arr_len) {
     return str_arr;
 }
 
-int lookup_precedence(char operator) {
+int precedence(char operator) {
 
     for (int i = 0; i < sizeof(operator_hash)/sizeof(operator_hash[0]); i++) {
         if (operator == operator_hash[i].operator) {
@@ -132,10 +132,9 @@ int lookup_precedence(char operator) {
 }
 
 bool compare_precedence(char operator_1, char operator_2) {
-    lookup_precedence(operator_1);
-    lookup_precedence(operator_2);
-    return false;
 
+    if (precedence(operator_2) >= precedence(operator_1)) return true;
+    return false;
 }
 
 void shunting_yard (char** string_array, q_node* output_queue, char* operator_stack) {
@@ -173,9 +172,20 @@ void shunting_yard (char** string_array, q_node* output_queue, char* operator_st
             }
                     
         } else if (*token == '+' || *token == '-' || *token == '*' || *token == '/' || *token == '%') { // OPERATOR
-            while (operator_stack[stk_index - 1] != '(' && compare_precedence(*token, operator_stack[stk_index - 1])) {
 
+            while (operator_stack[stk_index - 1] != '(' && compare_precedence(*token, operator_stack[stk_index - 1])) {
+                //
+
+                char temp[2] = {operator_stack[--stk_index], '\0'};
+                char* copy = strdup(temp);
+
+                enqueue(&output_queue, copy);
+                print_queue(output_queue);                
+                
+                operator_stack[stk_index] = '\0';
+                printf("OPERATOR STACK: %s\n", operator_stack);
             }
+
             operator_stack[stk_index++] = *token;
             operator_stack[stk_index] = '\0';
             printf("OPERATOR STACK: %s\n", operator_stack);
