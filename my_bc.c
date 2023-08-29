@@ -4,10 +4,10 @@
 #include <string.h>
 #include <stdbool.h>
 
-typedef struct queue_node {
+typedef struct l_list_node {
     char* data;
-    struct queue_node* next;
-} q_node;
+    struct l_list_node* next;
+} node;
 
 struct operator_info {
     const char operator;
@@ -24,8 +24,8 @@ const struct operator_info operator_hash[] = {
 
 
 // Function to add a node to the end of the linked list
-void enqueue(q_node** head, char* data) {
-    q_node* newNode = (q_node*) malloc(sizeof(q_node));
+void enqueue(node** head, char* data) {
+    node* newNode = (node*) malloc(sizeof(node));
     if (newNode == NULL) {
         // Handle memory allocation error
         return;
@@ -37,7 +37,7 @@ void enqueue(q_node** head, char* data) {
         *head = newNode;
     } else {
         // Otherwise, traverse the list to find the last node
-        q_node* current = *head;
+        node* current = *head;
         while (current->next != NULL) {
             current = current->next;
         }
@@ -47,8 +47,8 @@ void enqueue(q_node** head, char* data) {
 }
 
 // Function to print the linked list
-void print_queue(q_node* head) {
-    q_node* current = head;
+void print_list(node* head) {
+    node* current = head;
     while (current != NULL) {
         printf("%s => ", current->data);
         current = current->next;
@@ -137,7 +137,7 @@ bool compare_precedence(char operator_1, char operator_2) {
     return false;
 }
 
-void shunting_yard (char** string_array, q_node* output_queue, char* operator_stack) {
+void shunting_yard (char** string_array, node* output_queue, char* operator_stack) {
     int stk_index = 0;
     while (*string_array != NULL) { // while there are tokens to be read:
         
@@ -145,7 +145,7 @@ void shunting_yard (char** string_array, q_node* output_queue, char* operator_st
         
         if (token[0] >= '0' && token[0] <= '9') { // INTEGER 
             enqueue(&output_queue, token);
-            print_queue(output_queue);
+            print_list(output_queue);
 
         } else if (*token == '(') { // LEFT PARENTHESIS
             operator_stack[stk_index++] = *token;
@@ -160,7 +160,7 @@ void shunting_yard (char** string_array, q_node* output_queue, char* operator_st
                 char* copy = strdup(temp);
 
                 enqueue(&output_queue, copy);
-                print_queue(output_queue);                
+                print_list(output_queue);                
                 
                 operator_stack[stk_index] = '\0';
                 printf("OPERATOR STACK: %s\n", operator_stack);
@@ -180,7 +180,7 @@ void shunting_yard (char** string_array, q_node* output_queue, char* operator_st
                 char* copy = strdup(temp);
 
                 enqueue(&output_queue, copy);
-                print_queue(output_queue);                
+                print_list(output_queue);                
                 
                 operator_stack[stk_index] = '\0';
                 printf("OPERATOR STACK: %s\n", operator_stack);
@@ -201,12 +201,11 @@ void shunting_yard (char** string_array, q_node* output_queue, char* operator_st
         char* copy = strdup(temp);
 
         enqueue(&output_queue, copy);
-        print_queue(output_queue);
+        print_list(output_queue);
 
         operator_stack[stk_index] = '\0';
         printf("OPERATOR STACK: %s\n", operator_stack);
     }
-
 
 }
 
@@ -215,8 +214,8 @@ int main(int ac, char** av) {
     
     // TEST CASES
     
-    char case_1[] = "32 + 420 * ( 20 * 1 + 3 - 6 ) * 10 / 2";
-    char case_2[] = "1 + 2 * (3 - 42) / 5";
+    char case_1[] = "38 + 4 * ( 2 * 1 + 13 - 6 ) * 5 / 2";
+    char case_2[] = "10 * ( 321 - 4 ) + 2 % 5";
     char case_3[] = "1+2*(3-42)/5";
     char case_4[] = "321()";
     char case_5[] = "312/0";
@@ -237,13 +236,18 @@ int main(int ac, char** av) {
     }
     printf("\n");
 
-    // use shunting-yard algorithm to produce infix expression
+    // infix ---> postfix using shunting yard algorithm
     char operator_stack[strlen];
-    q_node* head = NULL;
-    q_node* current = NULL;
-    shunting_yard(string_array, head, operator_stack);
+    node* q_head = NULL;
+    shunting_yard(string_array, q_head, operator_stack);
 
-    // infix expression ---------> postfix expression
+    // evaluate postfix expression using stack
+
+    
+
+
+
+
     
     return 0;
 }
