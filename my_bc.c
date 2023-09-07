@@ -10,17 +10,40 @@ typedef struct l_list_node {
     struct l_list_node* next;
 } node;
 
+typedef int (*BinaryOperation)(int, int);
+
 struct operator_info {
     const char operator;
     const int precedence;
+    BinaryOperation operation;
 };
 
+int add(int a, int b){
+    return a + b;
+}
+
+int subtract(int a, int b){
+    return a - b;
+}
+
+int multiply(int a, int b){
+    return a * b;
+}
+
+int divide(int a, int b){
+    return a / b;
+}
+
+int modulo(int a, int b){
+    return a % b;
+}
+
 const struct operator_info operator_hash[] = {
-    {'+', 2},
-    {'-', 2},
-    {'*', 3},
-    {'/', 3},
-    {'%', 3},
+    {'+', 2, add},
+    {'-', 2, subtract},
+    {'*', 3, multiply},
+    {'/', 3, divide},
+    {'%', 3, modulo},
 };
 
 
@@ -58,7 +81,7 @@ void print_list(node* head) {
     printf("NULL\n");
 }
 
-int rm_space_and_strlen(char* str) {
+size_t rm_space_and_strlen(char* str) {
 
     char* src = str;
     char* dst = str;
@@ -74,6 +97,26 @@ int rm_space_and_strlen(char* str) {
     }
     *dst = '\0';
     return len + 1;
+}
+
+int my_atoi(char* str) {
+    int result = 0;
+    int sign = 1; // To handle negative numbers
+
+    // Check for a sign character (+ or -)
+    if (*str == '-') {
+        sign = -1;
+        str++; // Move to the next character
+    }
+
+    // Iterate through the string and convert characters to integers
+    while (*str >= '0' && *str <= '9') {
+        result = result * 10 + (*str - '0');
+        str++; // Move to the next character
+    }
+
+    // Apply the sign
+    return result * sign;
 }
 
 char** make_str_arr(char* str, int arr_len) {
@@ -131,6 +174,17 @@ int precedence(char operator) {
         }
     }
     return 0;
+}
+
+int evaluate(int a, char operator, int b){
+    int result;
+    for (int i = 0; i < sizeof(operator_hash) / sizeof(operator_hash[0]); i++) {
+        if (operator_hash[i].operator == operator) {
+            result = operator_hash[i].operation(a, b);
+            break;
+        }
+    }
+    return result;
 }
 
 bool compare_precedence(char operator_1, char operator_2) {
@@ -210,19 +264,39 @@ void shunting_yard (char** string_array, node** output_queue, char* operator_sta
 
 }
 
-int eval_postfix(node* output_queue, char** postfix_stack){
+int eval_postfix(node* output_queue, size_t my_strlen){
+
+    int* postfix_stack = (int*)malloc(my_strlen * sizeof(int));
+    int stk_i = 0;
+    
     // while output queue has stuff in it, push each item into the stack starting from the head until empty
     node* current = output_queue;
     while (current != NULL) {
-        char* push_me = current->data; 
-        printf("scan %s\n", push_me);
+        // INTEGER
+        if (current->data[0] >= '0' && current->data[0] <= '9') {
+            int push_me = my_atoi(current->data);
+            printf("INT scanned: %d\n", push_me);
+            postfix_stack[stk_i] = push_me;
+            stk_i++;
+
+        }
+
+        // OPERATOR
+        else {
+            char operator = current->data[0];
+            printf("OP scanned: %c\n", operator);
+            stk_i--;
+            int b = postfix_stack[stk_i];
+            stk_i--;
+            int a = postfix_stack[stk_i];
+            int result = evaluate(a, operator, b);
+            postfix_stack[stk_i] = result;
+            stk_i++;
+        }
         
-
-
-
         current = current->next;
     }
-    return 0;
+    return postfix_stack[0];
 }
 
 
@@ -243,8 +317,8 @@ int main(int ac, char** av) {
     // input string -------------> infix expression
     
     // remove spaces and get strlen
-    int my_strlen = rm_space_and_strlen(test);
-    printf("strlen = %d\n", my_strlen); // TEST PRINT
+    size_t my_strlen = rm_space_and_strlen(test);
+    printf("strlen = %zu\n", my_strlen); // TEST PRINT
     // create string array to separate out operators/parentheses and integers
     char** string_array = make_str_arr(test, my_strlen);
     for (int i = 0; string_array[i] != NULL; i++) {
@@ -258,10 +332,8 @@ int main(int ac, char** av) {
     shunting_yard(string_array, &q_head, operator_stack);
 
     // evaluate postfix expression using stack
-    print_list(q_head);
-    char** postfix_stack = (char **)malloc(my_strlen * sizeof(char *));
-    eval_postfix(q_head, postfix_stack);
-
+    int final_answer = eval_postfix(q_head, my_strlen);
+    printf("THE FINAL ANSWER IS: %d\n", final_answer);
 
 
 
