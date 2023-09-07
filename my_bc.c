@@ -71,15 +71,15 @@ void enqueue(node** head, char* data) {
     }
 }
 
-// Function to print the linked list
-void print_list(node* head) {
-    node* current = head;
-    while (current != NULL) {
-        printf("%s => ", current->data);
-        current = current->next;
-    }
-    printf("NULL\n");
-}
+// Function to print the linked list -- FOR DEBUGGING
+// void print_list(node* head) {
+//     node* current = head;
+//     while (current != NULL) {
+//         printf("%s => ", current->data);
+//         current = current->next;
+//     }
+//     printf("NULL\n");
+// }
 
 size_t rm_space_and_strlen(char* str) {
 
@@ -168,7 +168,7 @@ char** make_str_arr(char* str, int arr_len) {
 
 int precedence(char operator) {
 
-    for (int i = 0; i < sizeof(operator_hash)/sizeof(operator_hash[0]); i++) {
+    for (int i = 0; i < (int) sizeof(operator_hash)/(int) sizeof(operator_hash[0]); i++) {
         if (operator == operator_hash[i].operator) {
             return operator_hash[i].precedence;
         }
@@ -178,7 +178,7 @@ int precedence(char operator) {
 
 int evaluate(int a, char operator, int b){
     int result;
-    for (int i = 0; i < sizeof(operator_hash) / sizeof(operator_hash[0]); i++) {
+    for (int i = 0; i < (int) sizeof(operator_hash) /(int) sizeof(operator_hash[0]); i++) {
         if (operator_hash[i].operator == operator) {
             result = operator_hash[i].operation(a, b);
             break;
@@ -201,25 +201,25 @@ void shunting_yard (char** string_array, node** output_queue, char* operator_sta
         
         if (token[0] >= '0' && token[0] <= '9') { // INTEGER 
             enqueue(output_queue, token);
-            print_list(*output_queue);
+
 
         } else if (*token == '(') { // LEFT PARENTHESIS
             operator_stack[stk_index++] = *token;
             operator_stack[stk_index] = '\0';
-            printf("OPERATOR STACK: %s\n", operator_stack);
+
 
         } else if (*token == ')') { // RIGHT PARENTHESIS
-            printf(") found!\n");
+
             while (stk_index > 0 && operator_stack[stk_index - 1] != '(') {
                 
                 char temp[2] = {operator_stack[--stk_index], '\0'};
                 char* copy = strdup(temp);
 
                 enqueue(output_queue, copy);
-                print_list(*output_queue);                
+                
                 
                 operator_stack[stk_index] = '\0';
-                printf("OPERATOR STACK: %s\n", operator_stack);
+
                 
             }
             // remove '('
@@ -235,17 +235,17 @@ void shunting_yard (char** string_array, node** output_queue, char* operator_sta
                 char* copy = strdup(temp);
 
                 enqueue(output_queue, copy);
-                print_list(*output_queue);                
+               
                 
                 operator_stack[stk_index] = '\0';
-                printf("OPERATOR STACK: %s\n", operator_stack);
+
             }
 
             operator_stack[stk_index++] = *token;
             operator_stack[stk_index] = '\0';
-            printf("OPERATOR STACK: %s\n", operator_stack);
+
         }   
-        printf("--------\n");
+
 
         string_array++;
     }
@@ -256,10 +256,10 @@ void shunting_yard (char** string_array, node** output_queue, char* operator_sta
         char* copy = strdup(temp);
 
         enqueue(output_queue, copy);
-        print_list(*output_queue);
+
 
         operator_stack[stk_index] = '\0';
-        printf("OPERATOR STACK: %s\n", operator_stack);
+
     }
 
 }
@@ -275,7 +275,7 @@ int eval_postfix(node* output_queue, size_t my_strlen){
         // INTEGER
         if (current->data[0] >= '0' && current->data[0] <= '9') {
             int push_me = my_atoi(current->data);
-            printf("INT scanned: %d\n", push_me);
+
             postfix_stack[stk_i] = push_me;
             stk_i++;
 
@@ -284,7 +284,7 @@ int eval_postfix(node* output_queue, size_t my_strlen){
         // OPERATOR
         else {
             char operator = current->data[0];
-            printf("OP scanned: %c\n", operator);
+ 
             stk_i--;
             int b = postfix_stack[stk_i];
             stk_i--;
@@ -303,28 +303,26 @@ int eval_postfix(node* output_queue, size_t my_strlen){
 int main(int ac, char** av) {
     
     // TEST CASES
-    
-    char case_1[] = "38 + 4 * ( 2 * 1 + 13 - 6 ) * 5 / 2";
-    char case_2[] = "10 * ( 321 - 4 ) + 2 % 5";
-    char case_3[] = "1+2*(3-42)/5";
-    char case_4[] = "321()";
-    char case_5[] = "312/0";
-    char case_6[] = "-(-((-4)+-6))";
-    char case_7[] = "1234567890";
 
-    char* test = case_1;
+    // char case_1[] = "38 + 4 * ( 2 * 1 + 13 - 6 ) * 5 / 2";
+    // char case_2[] = "10 * ( 321 - 4 ) + 2 / 5";
+    // char case_3[] = "1+2*(3-42)/5";
+    // char case_4[] = "321()";
+    // char case_5[] = "312/0";
+    // char case_6[] = "-(-((-4)+-6))";
+    // char case_7[] = "1234567890";
+    char* test;
+    if (ac == 2) test = av[1];
+    else return -1;
     
     // input string -------------> infix expression
     
     // remove spaces and get strlen
     size_t my_strlen = rm_space_and_strlen(test);
-    printf("strlen = %zu\n", my_strlen); // TEST PRINT
+
     // create string array to separate out operators/parentheses and integers
     char** string_array = make_str_arr(test, my_strlen);
-    for (int i = 0; string_array[i] != NULL; i++) {
-        printf("%s", string_array[i]); // TEST PRINT
-    }
-    printf("\n-------------------------\n");
+
 
     // infix ---> postfix using shunting yard algorithm
     char operator_stack[my_strlen];
@@ -333,8 +331,8 @@ int main(int ac, char** av) {
 
     // evaluate postfix expression using stack
     int final_answer = eval_postfix(q_head, my_strlen);
-    printf("THE FINAL ANSWER IS: %d\n", final_answer);
-
+    printf("%d\n", final_answer);
+    
 
 
     
