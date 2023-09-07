@@ -4,6 +4,7 @@
 #include <string.h>
 #include <stdbool.h>
 
+// linked list will be used for output queue
 typedef struct l_list_node {
     char* data;
     struct l_list_node* next;
@@ -35,6 +36,7 @@ void enqueue(node** head, char* data) {
     if (*head == NULL) {
         // If the list is empty, make the new node the head
         *head = newNode;
+
     } else {
         // Otherwise, traverse the list to find the last node
         node* current = *head;
@@ -137,15 +139,15 @@ bool compare_precedence(char operator_1, char operator_2) {
     return false;
 }
 
-void shunting_yard (char** string_array, node* output_queue, char* operator_stack) {
+void shunting_yard (char** string_array, node** output_queue, char* operator_stack) {
     int stk_index = 0;
     while (*string_array != NULL) { // while there are tokens to be read:
         
         char* token = *string_array; // read a token
         
         if (token[0] >= '0' && token[0] <= '9') { // INTEGER 
-            enqueue(&output_queue, token);
-            print_list(output_queue);
+            enqueue(output_queue, token);
+            print_list(*output_queue);
 
         } else if (*token == '(') { // LEFT PARENTHESIS
             operator_stack[stk_index++] = *token;
@@ -159,8 +161,8 @@ void shunting_yard (char** string_array, node* output_queue, char* operator_stac
                 char temp[2] = {operator_stack[--stk_index], '\0'};
                 char* copy = strdup(temp);
 
-                enqueue(&output_queue, copy);
-                print_list(output_queue);                
+                enqueue(output_queue, copy);
+                print_list(*output_queue);                
                 
                 operator_stack[stk_index] = '\0';
                 printf("OPERATOR STACK: %s\n", operator_stack);
@@ -174,13 +176,12 @@ void shunting_yard (char** string_array, node* output_queue, char* operator_stac
         } else if (*token == '+' || *token == '-' || *token == '*' || *token == '/' || *token == '%') { // OPERATOR
 
             while (operator_stack[stk_index - 1] != '(' && compare_precedence(*token, operator_stack[stk_index - 1])) {
-                //
 
                 char temp[2] = {operator_stack[--stk_index], '\0'};
                 char* copy = strdup(temp);
 
-                enqueue(&output_queue, copy);
-                print_list(output_queue);                
+                enqueue(output_queue, copy);
+                print_list(*output_queue);                
                 
                 operator_stack[stk_index] = '\0';
                 printf("OPERATOR STACK: %s\n", operator_stack);
@@ -200,13 +201,28 @@ void shunting_yard (char** string_array, node* output_queue, char* operator_stac
         char temp[2] = {operator_stack[--stk_index], '\0'};
         char* copy = strdup(temp);
 
-        enqueue(&output_queue, copy);
-        print_list(output_queue);
+        enqueue(output_queue, copy);
+        print_list(*output_queue);
 
         operator_stack[stk_index] = '\0';
         printf("OPERATOR STACK: %s\n", operator_stack);
     }
 
+}
+
+int eval_postfix(node* output_queue, char** postfix_stack){
+    // while output queue has stuff in it, push each item into the stack starting from the head until empty
+    node* current = output_queue;
+    while (current != NULL) {
+        char* push_me = current->data; 
+        printf("scan %s\n", push_me);
+        
+
+
+
+        current = current->next;
+    }
+    return 0;
 }
 
 
@@ -227,23 +243,24 @@ int main(int ac, char** av) {
     // input string -------------> infix expression
     
     // remove spaces and get strlen
-    int strlen = rm_space_and_strlen(test);
-    printf("%s\nstrlen = %d\n", test, strlen); // TEST PRINT
+    int my_strlen = rm_space_and_strlen(test);
+    printf("strlen = %d\n", my_strlen); // TEST PRINT
     // create string array to separate out operators/parentheses and integers
-    char** string_array = make_str_arr(test, strlen);
+    char** string_array = make_str_arr(test, my_strlen);
     for (int i = 0; string_array[i] != NULL; i++) {
         printf("%s", string_array[i]); // TEST PRINT
     }
-    printf("\n");
+    printf("\n-------------------------\n");
 
     // infix ---> postfix using shunting yard algorithm
-    char operator_stack[strlen];
+    char operator_stack[my_strlen];
     node* q_head = NULL;
-    shunting_yard(string_array, q_head, operator_stack);
+    shunting_yard(string_array, &q_head, operator_stack);
 
     // evaluate postfix expression using stack
-
-    
+    print_list(q_head);
+    char** postfix_stack = (char **)malloc(my_strlen * sizeof(char *));
+    eval_postfix(q_head, postfix_stack);
 
 
 
