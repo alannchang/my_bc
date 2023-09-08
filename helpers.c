@@ -87,7 +87,7 @@ size_t rm_space_and_strlen(char* str) {
                 len = -1;
                 break;
             } else if (*src < '0') {
-                if (*src != '+' && *src != '-' && *src != '*' && *src != '/' && *src != '%') {
+                if (*src != '+' && *src != '-' && *src != '*' && *src != '/' && *src != '%' && *src != '(' && *src != ')') {
                     len = -1;
                     break;
                 }

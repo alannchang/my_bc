@@ -1,13 +1,18 @@
 CFLAGS = -Wall -Wextra -Werror
 TARGET = my_bc
 SRC = my_bc.c helpers.c
+OBJ = $(SRC:.c=.o)
+
 all : $(TARGET)
 
-$(TARGET) : $(SRC)
-	gcc $(CFLAGS) -o $(TARGET) $(SRC) 
+$(TARGET) : $(OBJ)
+	gcc $(CFLAGS) -o $(TARGET) $(OBJ)
+
+%.o: %.c
+	gcc $(CFLAGS) -c $< -o $@
 
 clean:
-	rm -f $(TARGET)
+	rm -f $(OBJ)
 
 fclean: clean
 	rm -f $(TARGET)
