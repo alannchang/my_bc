@@ -10,12 +10,10 @@ typedef struct l_list_node {
     struct l_list_node* next;
 } node;
 
-typedef int (*BinaryOperation)(int, int);
-
 struct operator_info {
     const char operator;
     const int precedence;
-    BinaryOperation operation;
+    int (*operation)(int, int);
 };
 
 int add(int a, int b){
@@ -31,10 +29,12 @@ int multiply(int a, int b){
 }
 
 int divide(int a, int b){
+    if (b == 0) printf("divide by zero");
     return a / b;
 }
 
 int modulo(int a, int b){
+    if (b == 0) printf("divide by zero");
     return a % b;
 }
 
@@ -80,6 +80,15 @@ void enqueue(node** head, char* data) {
 //     }
 //     printf("NULL\n");
 // }
+
+void free_linked_list(node* head) {
+    node* current = head;
+    while (current != NULL) {
+        node* next = current->next;
+        free(current);
+        current = next;
+    }
+}
 
 size_t rm_space_and_strlen(char* str) {
 
@@ -302,39 +311,29 @@ int eval_postfix(node* output_queue, size_t my_strlen){
 
 int main(int ac, char** av) {
     
-    // TEST CASES
-
-    // char case_1[] = "38 + 4 * ( 2 * 1 + 13 - 6 ) * 5 / 2";
-    // char case_2[] = "10 * ( 321 - 4 ) + 2 / 5";
-    // char case_3[] = "1+2*(3-42)/5";
-    // char case_4[] = "321()";
-    // char case_5[] = "312/0";
-    // char case_6[] = "-(-((-4)+-6))";
-    // char case_7[] = "1234567890";
-    char* test;
-    if (ac == 2) test = av[1];
-    else return -1;
+    char* expression;
+    if (ac == 2) expression = av[1];
+    else {
+        write(1, "Invalid expression\n", 20);
+        return -1;
+    }
     
-    // input string -------------> infix expression
-    
-    // remove spaces and get strlen
-    size_t my_strlen = rm_space_and_strlen(test);
+    // input string -------------> array of strings    
+    size_t my_strlen = rm_space_and_strlen(expression);
+    char** string_array = make_str_arr(expression, my_strlen);
 
-    // create string array to separate out operators/parentheses and integers
-    char** string_array = make_str_arr(test, my_strlen);
-
-
-    // infix ---> postfix using shunting yard algorithm
+    // infix ----------> postfix using shunting yard
     char operator_stack[my_strlen];
-    node* q_head = NULL;
-    shunting_yard(string_array, &q_head, operator_stack);
+    node* queue_head = NULL;
+    shunting_yard(string_array, &queue_head, operator_stack);
 
-    // evaluate postfix expression using stack
-    int final_answer = eval_postfix(q_head, my_strlen);
+    // evaluate postfix
+    int final_answer = eval_postfix(queue_head, my_strlen);
     printf("%d\n", final_answer);
     
+    free(string_array);
+    // free(operator_stack);
+    free_linked_list(queue_head);
 
-
-    
     return 0;
 }
