@@ -1,17 +1,20 @@
 #include "helpers.h"
 
-
 int main(int ac, char** av) {
     
     char* expression;
     if (ac == 2) expression = av[1];
     else {
-        write(1, "Invalid expression\n", 20);
+        write(1, "invalid expression\n", 20);
         return -1;
     }
     
     // input string -------------> array of strings    
     size_t my_strlen = rm_space_and_strlen(expression);
+    if (my_strlen < 1) {
+        write(1, "parse error\n", 12);
+        return -1;
+    }
     char** string_array = make_str_arr(expression, my_strlen);
 
     // infix ----------> postfix using shunting yard

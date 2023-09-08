@@ -78,10 +78,20 @@ size_t rm_space_and_strlen(char* str) {
 
     char* src = str;
     char* dst = str;
-    int len = 0;
+    size_t len = 0;
 
     while (*src) {
         if (*src != ' ') {
+            // check for invalid characters
+            if (*src > '9') {
+                len = -1;
+                break;
+            } else if (*src < '0') {
+                if (*src != '+' && *src != '-' && *src != '*' && *src != '/' && *src != '%') {
+                    len = -1;
+                    break;
+                }
+            }
             *dst = *src;
             dst++;
             len++;
