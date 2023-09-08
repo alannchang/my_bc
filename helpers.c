@@ -14,12 +14,10 @@ int multiply(int a, int b){
 }
 
 int divide(int a, int b){
-    if (b == 0) printf("divide by zero");
     return a / b;
 }
 
 int modulo(int a, int b){
-    if (b == 0) printf("divide by zero");
     return a % b;
 }
 
@@ -265,7 +263,7 @@ void shunting_yard (char** string_array, node** output_queue, char* operator_sta
     }
 }
 
-int eval_postfix(node* output_queue, size_t my_strlen){
+int eval_postfix(node* output_queue, size_t my_strlen, bool* zero_error){
 
     int* postfix_stack = (int*)malloc(my_strlen * sizeof(int));
     int stk_i = 0;
@@ -290,6 +288,12 @@ int eval_postfix(node* output_queue, size_t my_strlen){
             int b = postfix_stack[stk_i];
             stk_i--;
             int a = postfix_stack[stk_i];
+            if (b == 0) {
+                if (operator == '%' || operator == '/'){
+                    *zero_error = true;
+                    return -1;
+                }
+            }
             int result = evaluate(a, operator, b);
             postfix_stack[stk_i] = result;
             stk_i++;

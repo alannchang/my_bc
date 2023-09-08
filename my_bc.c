@@ -23,7 +23,12 @@ int main(int ac, char** av) {
     shunting_yard(string_array, &queue_head, operator_stack);
 
     // evaluate postfix
-    int result = eval_postfix(queue_head, my_strlen);
+    bool zero_error = false;
+    int result = eval_postfix(queue_head, my_strlen, &zero_error);
+    if (zero_error) {
+        write(1, "divide by zero\n", 15);
+        return -1;
+    }
     printf("%d\n", result);
 
     free(string_array);
