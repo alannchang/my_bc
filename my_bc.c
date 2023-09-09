@@ -5,15 +5,15 @@ int main(int ac, char** av) {
     char* expression;
     if (ac == 2) expression = av[1];
     else {
-        write(1, "invalid expression\n", 20);
-        return -1;
+        write(2, "invalid expression\n", 20);
+        return 1;
     }
     
     // input string -------------> array of strings    
     size_t my_strlen = rm_space_and_strlen(expression);
     if (my_strlen < 1) {
-        write(1, "parse error\n", 12);
-        return -1;
+        write(2, "parse error\n", 12);
+        return 1;
     }
     char** string_array = make_str_arr(expression, my_strlen);
 
@@ -26,8 +26,8 @@ int main(int ac, char** av) {
     bool zero_error = false;
     int result = eval_postfix(queue_head, my_strlen, &zero_error);
     if (zero_error) {
-        write(1, "divide by zero\n", 15);
-        return -1;
+        write(2, "divide by zero\n", 15);
+        return 1;
     }
     printf("%d\n", result);
 
