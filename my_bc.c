@@ -15,6 +15,12 @@ int main(int ac, char** av) {
         write(2, "parse error\n", 12);
         return 1;
     }
+
+    if (infix_checker(expression) != 0){
+        write(2, "parse error\n", 12);
+        return 1;
+    }
+
     char** string_array = make_str_arr(expression, my_strlen);
 
     // infix ----------> postfix using shunting yard

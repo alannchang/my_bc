@@ -39,6 +39,8 @@ void free_linked_list(node* head);
 
 size_t rm_space_and_strlen(char* str);
 
+int infix_checker(char* str);
+
 int my_atoi(char* str);
 
 char** make_str_arr(char* str, int arr_len);

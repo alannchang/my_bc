@@ -100,6 +100,23 @@ size_t rm_space_and_strlen(char* str) {
     return len + 1;
 }
 
+int infix_checker(char* str){
+    int i = 0;
+    while(str[i + 1] != '\0'){
+        // empty parentheses
+        if (str[i] == '(' && str[i + 1] == ')') return -1;
+        // three consecutive operators (ugly but it works)
+        if (str[i] == '+' || str[i] == '-' || str[i] == '/' || str[i] == '*' || str[i] == '%'){
+            if (str[i + 1] == '+' || str[i + 1] == '-' || str[i + 1] == '/' || str[i + 1] == '*' || str[i + 1] == '%') {
+                if (str[i - 1] == '+' || str[i - 1] == '-' || str[i - 1] == '/' || str[i - 1] == '*' || str[i - 1] == '%') return -1;
+            }
+        }
+        i++;
+    }
+
+    return 0;
+}
+
 int my_atoi(char* str) {
     int result = 0;
     int sign = 1; // To handle negative numbers
