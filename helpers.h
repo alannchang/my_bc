@@ -53,6 +53,8 @@ bool compare_precedence(char operator_1, char operator_2);
 
 void shunting_yard (char** string_array, node** output_queue, char* operator_stack);
 
+int stack_to_queue(char* operator_stack, int stk_index, node** output_queue);
+
 int eval_postfix(node* output_queue, size_t my_strlen, bool* zero_error);
 
 #endif

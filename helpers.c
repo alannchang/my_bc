@@ -29,11 +29,10 @@ const struct operator_info operator_hash[] = {
     {'%', 3, modulo},
 };
 
-// Function to add a node to the end of the linked list
+
 void enqueue(node** head, char* data) {
     node* newNode = (node*) malloc(sizeof(node));
     if (newNode == NULL) {
-        // Handle memory allocation error
         return;
     }
     newNode->data = data;
@@ -53,7 +52,7 @@ void enqueue(node** head, char* data) {
     }
 }
 
-// Function to print the linked list -- FOR DEBUGGING
+// FOR DEBUGGING ONLY
 // void print_list(node* head) {
 //     node* current = head;
 //     while (current != NULL) {
@@ -79,17 +78,21 @@ size_t rm_space_and_strlen(char* str) {
     size_t len = 0;
 
     while (*src) {
+
         if (*src != ' ') {
+
             // check for invalid characters
             if (*src > '9') {
                 len = -1;
                 break;
+
             } else if (*src < '0') {
                 if (*src != '+' && *src != '-' && *src != '*' && *src != '/' && *src != '%' && *src != '(' && *src != ')') {
                     len = -1;
                     break;
                 }
             }
+
             *dst = *src;
             dst++;
             len++;
@@ -101,16 +104,21 @@ size_t rm_space_and_strlen(char* str) {
 }
 
 int infix_checker(char* str){
+
     int i = 0;
+    
     while(str[i + 1] != '\0'){
+
         // empty parentheses
         if (str[i] == '(' && str[i + 1] == ')') return -1;
-        // three consecutive operators (ugly but it works)
+        
+        // three consecutive operators -- ugly but it works ¯\_(ツ)_/¯
         if (str[i] == '+' || str[i] == '-' || str[i] == '/' || str[i] == '*' || str[i] == '%'){
             if (str[i + 1] == '+' || str[i + 1] == '-' || str[i + 1] == '/' || str[i + 1] == '*' || str[i + 1] == '%') {
                 if (str[i - 1] == '+' || str[i - 1] == '-' || str[i - 1] == '/' || str[i - 1] == '*' || str[i - 1] == '%') return -1;
             }
         }
+
         i++;
     }
 
@@ -119,21 +127,19 @@ int infix_checker(char* str){
 
 int my_atoi(char* str) {
     int result = 0;
-    int sign = 1; // To handle negative numbers
+    int sign = 1;
 
     // Check for a sign character (+ or -)
     if (*str == '-') {
         sign = -1;
-        str++; // Move to the next character
+        str++;
     }
 
-    // Iterate through the string and convert characters to integers
     while (*str >= '0' && *str <= '9') {
         result = result * 10 + (*str - '0');
-        str++; // Move to the next character
+        str++;
     }
 
-    // Apply the sign
     return result * sign;
 }
 
@@ -154,6 +160,7 @@ char** make_str_arr(char* str, int arr_len) {
         } else { // if operator/parentheses found
             
             if (int_buff[0] != '\0') { // if preceded by a number
+
                 // add contents of int_buff to string array
                 int_buff[i_int_buff] = '\0';
                 str_arr[i_str_arr] = malloc(i_int_buff * sizeof(char*));
@@ -161,12 +168,14 @@ char** make_str_arr(char* str, int arr_len) {
                 i_int_buff = 0;
                 int_buff[0] = '\0';
                 i_str_arr++;
+
                 // add operator to string array
                 str_arr[i_str_arr] = malloc(2);
                 str_arr[i_str_arr][0] = *str;
                 str_arr[i_str_arr][1] = '\0';
                 i_str_arr++;
             } else {
+
                 // add operator to string array
                 str_arr[i_str_arr] = malloc(2);
                 str_arr[i_str_arr][0] = *str;
@@ -220,25 +229,16 @@ void shunting_yard (char** string_array, node** output_queue, char* operator_sta
         if (token[0] >= '0' && token[0] <= '9') { // INTEGER 
             enqueue(output_queue, token);
 
-
         } else if (*token == '(') { // LEFT PARENTHESIS
             operator_stack[stk_index++] = *token;
             operator_stack[stk_index] = '\0';
-
 
         } else if (*token == ')') { // RIGHT PARENTHESIS
 
             while (stk_index > 0 && operator_stack[stk_index - 1] != '(') {
                 
-                char temp[2] = {operator_stack[--stk_index], '\0'};
-                char* copy = malloc(2);
-                strcpy(copy, temp);
-
-                enqueue(output_queue, copy);
-                
-                
+                stk_index = stack_to_queue(operator_stack, stk_index, output_queue);
                 operator_stack[stk_index] = '\0';
-
                 
             }
             // remove '('
@@ -250,32 +250,21 @@ void shunting_yard (char** string_array, node** output_queue, char* operator_sta
 
             while (operator_stack[stk_index - 1] != '(' && compare_precedence(*token, operator_stack[stk_index - 1])) {
 
-                char temp[2] = {operator_stack[--stk_index], '\0'};
-                char* copy = malloc(2);
-                strcpy(copy, temp);
-
-                enqueue(output_queue, copy);
-               
-                
+                stk_index = stack_to_queue(operator_stack, stk_index, output_queue);
                 operator_stack[stk_index] = '\0';
-
             }
 
             operator_stack[stk_index++] = *token;
             operator_stack[stk_index] = '\0';
 
         }   
-
-
         string_array++;
     }
 
     // After while loop, pop everything from operator stack to output queue.
     while (stk_index > 0) {
-        char temp[2] = {operator_stack[--stk_index], '\0'};
-        char* copy = strdup(temp);
 
-        enqueue(output_queue, copy);
+        stk_index = stack_to_queue(operator_stack, stk_index, output_queue);
         operator_stack[stk_index] = '\0';
     }
 }
@@ -285,7 +274,7 @@ int eval_postfix(node* output_queue, size_t my_strlen, bool* zero_error){
     int* postfix_stack = (int*)malloc(my_strlen * sizeof(int));
     int stk_i = 0;
     
-    // while output queue has stuff in it, push each item into the stack starting from the head until empty
+    // push from queue to stack starting from the head until empty
     node* current = output_queue;
     while (current != NULL) {
         // INTEGER
@@ -319,4 +308,13 @@ int eval_postfix(node* output_queue, size_t my_strlen, bool* zero_error){
         current = current->next;
     }
     return postfix_stack[0];
+}
+
+int stack_to_queue(char* operator_stack, int stk_index, node** output_queue) {
+    char temp[2] = {operator_stack[--stk_index], '\0'};
+    char* copy = malloc(2);
+    strcpy(copy, temp);
+
+    enqueue(output_queue, copy);
+    return stk_index;
 }
