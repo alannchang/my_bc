@@ -1,6 +1,5 @@
 #include "helpers.h"
 
-
 int add(int a, int b){
     return a + b;
 }
@@ -31,12 +30,13 @@ const struct operator_info operator_hash[] = {
 
 
 void enqueue(node** head, char* data) {
+
     node* newNode = (node*) malloc(sizeof(node));
     if (newNode == NULL) {
         return;
     }
     newNode->data = data;
-    newNode->next = NULL; // New node will be the last node, so set its next to NULL
+    newNode->next = NULL;
     if (*head == NULL) {
         // If the list is empty, make the new node the head
         *head = newNode;
@@ -54,6 +54,7 @@ void enqueue(node** head, char* data) {
 
 // FOR DEBUGGING ONLY
 // void print_list(node* head) {
+//
 //     node* current = head;
 //     while (current != NULL) {
 //         printf("%s => ", current->data);
@@ -63,6 +64,7 @@ void enqueue(node** head, char* data) {
 // }
 
 void free_linked_list(node* head) {
+
     node* current = head;
     while (current != NULL) {
         node* next = current->next;
@@ -118,7 +120,6 @@ int infix_checker(char* str){
                 if (str[i - 1] == '+' || str[i - 1] == '-' || str[i - 1] == '/' || str[i - 1] == '*' || str[i - 1] == '%') return -1;
             }
         }
-
         i++;
     }
 
@@ -126,6 +127,7 @@ int infix_checker(char* str){
 }
 
 int my_atoi(char* str) {
+
     int result = 0;
     int sign = 1;
 
@@ -204,6 +206,7 @@ int precedence(char operator) {
 }
 
 int evaluate(int a, char operator, int b){
+
     int result;
     for (int i = 0; i < (int) sizeof(operator_hash) /(int) sizeof(operator_hash[0]); i++) {
         if (operator_hash[i].op == operator) {
@@ -220,11 +223,22 @@ bool compare_precedence(char op_1, char op_2) {
     return false;
 }
 
+int stack_to_queue(char* operator_stack, int stk_index, node** output_queue) {
+    
+    char temp[2] = {operator_stack[--stk_index], '\0'};
+    char* copy = malloc(2);
+    strcpy(copy, temp);
+
+    enqueue(output_queue, copy);
+    return stk_index;
+}
+
 void shunting_yard (char** string_array, node** output_queue, char* operator_stack) {
+
     int stk_index = 0;
     while (*string_array != NULL) { // while there are tokens to be read:
         
-        char* token = *string_array; // read a token
+        char* token = *string_array;
         
         if (token[0] >= '0' && token[0] <= '9') { // INTEGER 
             enqueue(output_queue, token);
@@ -277,17 +291,15 @@ int eval_postfix(node* output_queue, size_t my_strlen, bool* zero_error){
     // push from queue to stack starting from the head until empty
     node* current = output_queue;
     while (current != NULL) {
-        // INTEGER
-        if (current->data[0] >= '0' && current->data[0] <= '9') {
+        
+        if (current->data[0] >= '0' && current->data[0] <= '9') { // INTEGER
             int push_me = my_atoi(current->data);
 
             postfix_stack[stk_i] = push_me;
             stk_i++;
-
         }
 
-        // OPERATOR
-        else {
+        else { // OPERATOR
             char operator = current->data[0];
  
             stk_i--;
@@ -308,13 +320,4 @@ int eval_postfix(node* output_queue, size_t my_strlen, bool* zero_error){
         current = current->next;
     }
     return postfix_stack[0];
-}
-
-int stack_to_queue(char* operator_stack, int stk_index, node** output_queue) {
-    char temp[2] = {operator_stack[--stk_index], '\0'};
-    char* copy = malloc(2);
-    strcpy(copy, temp);
-
-    enqueue(output_queue, copy);
-    return stk_index;
 }

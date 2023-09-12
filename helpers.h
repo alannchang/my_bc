@@ -7,7 +7,6 @@
 #include <string.h>
 #include <stdbool.h>
 
-// linked list will be used for output queue
 typedef struct l_list_node {
     char* data;
     struct l_list_node* next;
@@ -29,8 +28,6 @@ int divide(int a, int b);
 
 int modulo(int a, int b);
 
-
-// Function to add a node to the end of the linked list
 void enqueue(node** head, char* data);
 
 // void print_list(node* head);
